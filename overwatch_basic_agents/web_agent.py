@@ -3,6 +3,8 @@ from datetime import datetime
 from multiprocessing import Process
 import logging
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from socket import AF_INET, getfqdn, socket
 import ssl
 from time import monotonic as monotime
@@ -64,15 +66,18 @@ def run_web_agent(conf):
 
 def run_web_agent_iteration(conf, sleep_interval):
     rs = requests.session()
+    retries = Retry(
+        total=3,
+        backoff_factor=0.1,
+        status_forcelist=[500, 502, 503, 504])
+    rs.mount('http://', HTTPAdapter(max_retries=retries))
+    rs.mount('https://', HTTPAdapter(max_retries=retries))
     procs = []
     for n, target in enumerate(conf.watch_targets, start=1):
         logger.info('Processing target %d/%d: %s', n, len(conf.watch_targets), target.url)
         p = Process(target=process_target, args=(conf, sleep_interval, rs, target, ))
         p.start()
         procs.append(p)
-       #process_target(conf, sleep_interval, rs, target)
-#    for p in procs:
-#        p.join()
 
 
 def process_target(conf, sleep_interval, rs, target):
