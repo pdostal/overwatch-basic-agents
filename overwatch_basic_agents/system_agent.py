@@ -113,7 +113,7 @@ def gather_outward_ip4():
             r.raise_for_status()
             return r.text.strip()
         except Exception as e:
-            logger.debug('Failed to retrieve outward_ip from %s because of: %r', ipv4_addrs[0], e)
+            logger.debug('Failed to retrieve outward_ip because of: %r', e)
     except socket.gaierror:
         logger.exception('Failed to resolve A record for ip.messa.cz')
         return None
@@ -130,7 +130,7 @@ def gather_outward_ip6():
             r.raise_for_status()
             return r.text.strip()
         except Exception as e:
-            logger.debug('Failed to retrieve outward_ip from %s because of: %r', ipv6_addrs[0], e)
+            logger.debug('Failed to retrieve outward_ip because of: %r', e)
     except socket.gaierror:
         logger.exception('Failed to resolve AAAA record for ip.messa.cz')
         return None
